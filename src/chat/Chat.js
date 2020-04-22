@@ -16,8 +16,10 @@ import NewMessage from './NewMessage';
 import CustomAvatar from '../components/CustomAvatar';
 import { loadUser } from '../utils/dbUtils';
 import DeleteIcon from '@material-ui/icons/Delete';
+import FavoritIcon from '@material-ui/icons/Favorite';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
+import Loader from '../components/Loader';
 
 const useStyles = makeStyles((theme) => ({
   text: {
@@ -38,13 +40,18 @@ const useStyles = makeStyles((theme) => ({
     '&:hover $buttonDelete': {
       visibility: 'inherit',
     },
+    '&:hover $buttonFavorite': {
+      visibility: 'inherit',
+    },
   },
   buttonDelete: { visibility: 'hidden' },
+  buttonFavorite: { visibility: 'hidden' },
 }));
 
 const Chat = ({ history }) => {
   const classes = useStyles();
   const [messages, setMessages] = useState([]);
+  const [us, setUs] = useState(null);
 
   const chatDomRef = useRef();
 
@@ -76,6 +83,8 @@ const Chat = ({ history }) => {
           .once('value')
           .then((userResp) => {
             messageItem.user = userResp.val();
+            setUs(firebase.auth().currentUser.uid);
+            console.log('messages---', firebase.auth().currentUser.uid);
             addMessage(messageItem);
           });
       },
@@ -88,7 +97,16 @@ const Chat = ({ history }) => {
     );
   }, []);
 
-  console.log('messages---', messages);
+  // const handleMouseOver = (event) => {
+  //   console.log(JSON.parse(event.target.dataset.info));
+  // };
+
+  // console.log('messages---', messages);
+  // console.log('cur-us---', firebase.auth().currentUser);
+  // if (firebase.auth().currentUser) {
+  //   const curUs = firebase.auth().currentUser.uid;
+  //   console.log('cur-us---', curUs);
+  // }
 
   return (
     <Container>
@@ -96,9 +114,17 @@ const Chat = ({ history }) => {
         <Typography className={classes.text} variant="h5" gutterBottom>
           Chat
         </Typography>
+        {!us && <Loader />}
         <List className={classes.list} ref={chatDomRef}>
-          {messages.map(({ date, user, message }) => (
-            <ListItem button key={date} className={classes.listItem}>
+          {console.log(us)}
+          {messages.map(({ date, user, message, id }) => (
+            <ListItem
+              button
+              key={date}
+              className={classes.listItem}
+              data-info={JSON.stringify(id)}
+              // onMouseOver={handleMouseOver}
+            >
               <ListItemAvatar>
                 <CustomAvatar name={user.name} avatar={user.avatar} size="md" />
                 {/* <CustomAvatar name={user.name} avatar={user.avatar} size="md" /> */}
@@ -107,18 +133,26 @@ const Chat = ({ history }) => {
                 primary={user ? user.name : 'anonymous'}
                 secondary={message}
               />
-              {/* <ListItemSecondaryAction
-                className={classes.listItemSecondaryAction}
-              > */}
-              <Tooltip title="Delete">
-                <IconButton
-                  aria-label="delete"
-                  className={classes.buttonDelete}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
-              {/* </ListItemSecondaryAction> */}
+
+              {us === id ? (
+                <Tooltip title="Delete">
+                  <IconButton
+                    aria-label="delete"
+                    className={classes.buttonDelete}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
+              ) : (
+                <Tooltip title="Favorite">
+                  <IconButton
+                    aria-label="favorite"
+                    className={classes.buttonFavorite}
+                  >
+                    <FavoritIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
             </ListItem>
           ))}
         </List>

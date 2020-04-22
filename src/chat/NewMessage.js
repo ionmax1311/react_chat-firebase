@@ -47,6 +47,7 @@ const NewMessage = () => {
       user: currentUser.uid,
       message,
       date: firebase.database.ServerValue.TIMESTAMP,
+      id: currentUser.uid,
     };
 
     firebase
