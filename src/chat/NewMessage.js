@@ -40,13 +40,14 @@ const NewMessage = () => {
     e.preventDefault();
 
     const { currentUser } = firebase.auth();
-    console.log('currentUser', currentUser);
+    // console.log('currentUser', currentUser);
     if (!currentUser) return;
 
     const newMessage = {
       user: currentUser.uid,
       message,
-      date: firebase.database.ServerValue.TIMESTAMP,
+      // date: firebase.database.ServerValue.TIMESTAMP,
+      date: Date.now(),
       id: currentUser.uid,
     };
 
@@ -88,6 +89,7 @@ const NewMessage = () => {
                 endIcon={<Icon>send</Icon>}
                 fullWidth
                 disabled={!message.length}
+                onClick={handleSubmit}
               >
                 Send
               </Button>

@@ -5,7 +5,7 @@ import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import List from '@material-ui/core/List';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+
 import ListItem from '@material-ui/core/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -14,7 +14,7 @@ import 'firebase/database';
 import 'firebase/auth';
 import NewMessage from './NewMessage';
 import CustomAvatar from '../components/CustomAvatar';
-import { loadUser } from '../utils/dbUtils';
+
 import DeleteIcon from '@material-ui/icons/Delete';
 import FavoritIcon from '@material-ui/icons/Favorite';
 import IconButton from '@material-ui/core/IconButton';
@@ -50,21 +50,73 @@ const useStyles = makeStyles((theme) => ({
 
 const Chat = ({ history }) => {
   const classes = useStyles();
-  const [messages, setMessages] = useState([]);
+  let [messages, setMessages] = useState([]);
   const [us, setUs] = useState(null);
 
   const chatDomRef = useRef();
 
-  const addMessage = (message) => {
+  const addMessage = (message, date) => {
+    console.log('messages-add', messages);
+    console.log(
+      'messages-add111',
+      messages.filter((e) => e.message.date !== message.date)
+    );
+    console.log('message-add', message);
+    console.log('message-add22', message.date);
+    // debugger;
     messages.push(message);
-    setMessages([...messages.sort((a, b) => a.date - b.date)]);
+
+    // setMessages([...messages.sort((a, b) => a.date - b.date)]);
+    setMessages([
+      ...messages
+        .filter((e) => e.message.date !== message.date)
+        .sort((a, b) => a.date - b.date),
+    ]);
 
     if (chatDomRef.current) {
       chatDomRef.current.scrollTop = chatDomRef.current.scrollHeight;
     }
   };
 
+  const handleRemove = (date) => {
+    // debugger;
+
+    console.log('1', date);
+    let ref = firebase.database().ref('chat');
+
+    ref
+      .orderByChild('date')
+      .equalTo(date)
+      .on('value', (snapshot) => {
+        snapshot.forEach((child) => {
+          // console.log(child.key);
+          // console.log(date);
+          console.log(child.val());
+          firebase.database().ref(`/chat/${child.key}`).remove();
+          console.log('messages-del--111', messages);
+
+          // messages = messages.splice(1, 2);
+
+          // setMessages(messages);
+
+          setMessages(messages.filter((e) => e.date !== date));
+          // setMessages(messages);
+          console.log(
+            'messages-del---222',
+            messages.filter((e) => e.date !== date)
+          );
+
+          ////////////
+        });
+      });
+
+    alert('done');
+  };
+
+  console.log('messages', messages);
+
   useEffect(() => {
+    // setMessages(messages);
     const chatRef = firebase.database().ref('/chat');
 
     chatRef.on(
@@ -72,11 +124,7 @@ const Chat = ({ history }) => {
       (snapshot) => {
         //  new message
         const messageItem = snapshot.val();
-        // loadUser(messageItem.user).then((data) => {
-        //   messageItem.user = data;
-        //   addMessage(messageItem);
-        //   console.log('cur-uid---', firebase.auth().currentUser.uid);
-        // });
+
         firebase
           .database()
           .ref(`/users/${messageItem.user}`)
@@ -84,7 +132,7 @@ const Chat = ({ history }) => {
           .then((userResp) => {
             messageItem.user = userResp.val();
             setUs(firebase.auth().currentUser.uid);
-            console.log('messages---', firebase.auth().currentUser.uid);
+            console.log('messageItem', messageItem);
             addMessage(messageItem);
           });
       },
@@ -97,17 +145,6 @@ const Chat = ({ history }) => {
     );
   }, []);
 
-  // const handleMouseOver = (event) => {
-  //   console.log(JSON.parse(event.target.dataset.info));
-  // };
-
-  // console.log('messages---', messages);
-  // console.log('cur-us---', firebase.auth().currentUser);
-  // if (firebase.auth().currentUser) {
-  //   const curUs = firebase.auth().currentUser.uid;
-  //   console.log('cur-us---', curUs);
-  // }
-
   return (
     <Container>
       <Paper square className={classes.paper}>
@@ -116,29 +153,24 @@ const Chat = ({ history }) => {
         </Typography>
         {!us && <Loader />}
         <List className={classes.list} ref={chatDomRef}>
-          {console.log(us)}
           {messages.map(({ date, user, message, id }) => (
-            <ListItem
-              button
-              key={date}
-              className={classes.listItem}
-              data-info={JSON.stringify(id)}
-              // onMouseOver={handleMouseOver}
-            >
+            <ListItem button key={date} className={classes.listItem}>
               <ListItemAvatar>
                 <CustomAvatar name={user.name} avatar={user.avatar} size="md" />
-                {/* <CustomAvatar name={user.name} avatar={user.avatar} size="md" /> */}
               </ListItemAvatar>
               <ListItemText
                 primary={user ? user.name : 'anonymous'}
                 secondary={message}
               />
-
+              {/* {console.log(key)} */}
               {us === id ? (
                 <Tooltip title="Delete">
                   <IconButton
                     aria-label="delete"
                     className={classes.buttonDelete}
+                    onClick={() => {
+                      handleRemove(date);
+                    }}
                   >
                     <DeleteIcon />
                   </IconButton>
