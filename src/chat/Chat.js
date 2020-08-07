@@ -178,7 +178,6 @@ const Chat = ({ history }) => {
   };
 
   useEffect(() => {
-    // setMessages(messages);
     const chatRef = firebase.database().ref("/chat");
 
     chatRef.on(
@@ -195,7 +194,7 @@ const Chat = ({ history }) => {
             messageItem.user = userResp.val();
             setUs(firebase.auth().currentUser.uid);
             console.log("messageitem", messageItem);
-            // console.log("messageitem-messagwe", messageItem.message);
+
             addMessage(messageItem);
           });
       },
@@ -238,7 +237,7 @@ const Chat = ({ history }) => {
             messageItem.user = userResp.val();
             setUs(firebase.auth().currentUser.uid);
             console.log("messageitem", messageItem);
-            // console.log("messageitem-messagwe", messageItem.message);
+
             addMessage(messageItem);
           });
 
@@ -246,7 +245,6 @@ const Chat = ({ history }) => {
           .filter((e) => e.date !== messageItem.date)
           .sort((a, b) => a.date - b.date);
 
-        // console.log(snapshot.val().message);
         console.log("child_changed-messages", messages);
       },
       (error) => {
@@ -308,7 +306,7 @@ const Chat = ({ history }) => {
                 primary={user ? user.name : "anonymous"}
                 secondary={message}
               />
-              {/* {console.log(key)} */}
+
               {us === id ? (
                 <div>
                   <Tooltip title="Delete">
