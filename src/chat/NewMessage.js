@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import React, { useState, useEffect } from "react";
+import { makeStyles } from "@material-ui/core/styles";
 
-import Paper from '@material-ui/core/Paper';
-import Icon from '@material-ui/core/Icon';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
+import Paper from "@material-ui/core/Paper";
+import Icon from "@material-ui/core/Icon";
+import Grid from "@material-ui/core/Grid";
+import TextField from "@material-ui/core/TextField";
 
-import Button from '@material-ui/core/Button';
-import Box from '@material-ui/core/Box';
-import firebase from 'firebase/app';
-import 'firebase/database';
-import 'firebase/auth';
+import Button from "@material-ui/core/Button";
+import Box from "@material-ui/core/Box";
+import firebase from "firebase/app";
+import "firebase/database";
+import "firebase/auth";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -20,21 +20,21 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: 20,
   },
   message: {
-    padding: '0 20px',
-    border: '1px solid #ccc',
+    padding: "0 20px",
+    border: "1px solid #ccc",
     borderRadius: 8,
-    justifyContent: 'space-between',
-    flexWrap: 'nowrap',
+    justifyContent: "space-between",
+    flexWrap: "nowrap",
   },
   box: {
-    height: '100%',
+    height: "100%",
     paddingLeft: 20,
   },
 }));
 
 const NewMessage = () => {
   const classes = useStyles();
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -53,10 +53,10 @@ const NewMessage = () => {
 
     firebase
       .database()
-      .ref('/chat')
+      .ref("/chat")
       .push(newMessage)
       .then((res) => {
-        setMessage('');
+        setMessage("");
       })
       .catch((error) => {
         console.log(error);
